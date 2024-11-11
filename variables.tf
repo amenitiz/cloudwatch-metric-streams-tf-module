@@ -42,7 +42,7 @@ variable "cloudwatch_metric_stream_exclude_filter" {
   default     = []
 }
 
-variable "newrelic_aws_link_account_name" {
-  description = "Name for the AWS Link Account in New Relic."
-  type        = string
-}
+# variable "newrelic_aws_link_account_name" {
+#   description = "Name for the AWS Link Account in New Relic."
+#   type        = string
+# }

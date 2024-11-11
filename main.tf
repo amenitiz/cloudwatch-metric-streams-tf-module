@@ -123,10 +123,10 @@ resource "aws_cloudwatch_metric_stream" "cloudwatch-metric-stream" {
   }
 }
 
-# New Relic Account Link
+# # New Relic Account Link
 
-resource "newrelic_cloud_aws_link_account" "cloudwatch_metric_stream_paris" {
-  arn                    = aws_iam_role.newrelic-one-external-role.arn
-  metric_collection_mode = "PUSH"
-  name                   = var.newrelic_aws_link_account_name
-}
+# resource "newrelic_cloud_aws_link_account" "cloudwatch_metric_stream_paris" {
+#   arn                    = aws_iam_role.newrelic-one-external-role.arn
+#   metric_collection_mode = "PUSH"
+#   name                   = var.newrelic_aws_link_account_name
+# }
