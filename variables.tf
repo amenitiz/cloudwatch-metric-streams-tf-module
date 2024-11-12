@@ -32,12 +32,12 @@ variable "name_suffix" {
 
 variable "cloudwatch_metric_stream_include_filter" {
   description = "List of namespaces to include from the CloudWatch Metric Stream. Mutually exclusive with cloudwatch_metric_stream_exclude_filter. Optional."
-  type        = list
+  type        = list(any)
   default     = []
 }
 
 variable "cloudwatch_metric_stream_exclude_filter" {
   description = "List of namespaces to exclude from the CloudWatch Metric Stream. Mutually exclusive with cloudwatch_metric_stream_include_filter. Optional."
-  type        = list
+  type        = list(any)
   default     = []
 }

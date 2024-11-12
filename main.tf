@@ -33,6 +33,19 @@ resource "aws_iam_role" "kinesis-firehose-stream-role" {
 
 resource "aws_s3_bucket" "kinesis-firehose-stream-failed-data" {
   bucket = "${var.name_prefix}cloudwatch-metric-stream-failed-data${var.name_suffix}"
+}
+
+resource "aws_s3_bucket_ownership_controls" "kinesis-firehose-stream-failed-data" {
+  bucket = aws_s3_bucket.kinesis-firehose-stream-failed-data.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+
+resource "aws_s3_bucket_acl" "kinesis-firehose-stream-failed-data" {
+  depends_on = [aws_s3_bucket_ownership_controls.kinesis-firehose-stream-failed-data]
+
+  bucket = aws_s3_bucket.kinesis-firehose-stream-failed-data.id
   acl    = "private"
 }
 
@@ -46,14 +59,6 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis-firehose-stream" {
   name        = "${var.name_prefix}cloudwatch-metric-stream${var.name_suffix}"
   destination = "http_endpoint"
 
-  s3_configuration {
-    role_arn           = aws_iam_role.kinesis-firehose-stream-role.arn
-    bucket_arn         = aws_s3_bucket.kinesis-firehose-stream-failed-data.arn
-    buffer_size        = 10  # MiB
-    buffer_interval    = 300 # seconds
-    compression_format = "GZIP"
-  }
-
   http_endpoint_configuration {
     url                = var.newrelic_collector_endpoint
     name               = "New Relic - Metrics"
@@ -64,10 +69,20 @@ resource "aws_kinesis_firehose_delivery_stream" "kinesis-firehose-stream" {
     s3_backup_mode     = "FailedDataOnly"
     retry_duration     = 60 # seconds
 
+    s3_configuration {
+      role_arn           = aws_iam_role.kinesis-firehose-stream-role.arn
+      bucket_arn         = aws_s3_bucket.kinesis-firehose-stream-failed-data.arn
+      buffering_size     = 10  # MiB
+      buffering_interval = 300 # seconds
+      compression_format = "GZIP"
+    }
+
     request_configuration {
       content_encoding = "GZIP"
     }
   }
+
+
 }
 
 # CloudWatch Metric Stream
