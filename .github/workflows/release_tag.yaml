@@ -1,0 +1,32 @@
+name: Tag Release to Main
+
+on:
+  push:
+    branches:
+      - main
+      - PLT-989-Implement-versioning-of-Terraform-modules
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with :
+          fetch-depth: '0'
+          fetch-tags: 'true'
+
+      - name: Generate and push tag to main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LATEST_TAG=$(git tag --sort=-creatordate --merged PLT-989-Implement-versioning-of-Terraform-modules  | grep -E '^[0-9]+-' | head -n 1)
+          CURRENT_NUMBER=${LATEST_TAG%%-*}
+          if [ "$CURRENT_NUMBER" = "$LATEST_TAG" ]; then
+            CURRENT_NUMBER=0
+          fi
+          NEW_NUMBER=$((CURRENT_NUMBER + 1))
+          NEW_TAG="${NEW_NUMBER}-testing"
+          git tag "$NEW_TAG"
+          git push origin "$NEW_TAG"
