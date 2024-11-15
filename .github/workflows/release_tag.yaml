@@ -27,6 +27,6 @@ jobs:
             CURRENT_NUMBER=0
           fi
           NEW_NUMBER=$((CURRENT_NUMBER + 1))
-          NEW_TAG="${NEW_NUMBER}-testing"
+          NEW_TAG="${NEW_NUMBER}-$(git rev-parse --short=7 HEAD)"
           git tag "$NEW_TAG"
           git push origin "$NEW_TAG"
