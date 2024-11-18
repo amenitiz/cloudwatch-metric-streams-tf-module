@@ -1,0 +1,28 @@
+---
+name: Lint GitHub Workflows
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint-github-workflows:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up actionlint
+        run: |
+          curl \
+            -L https://github.com/rhysd/actionlint/releases/download/v1.7.1/actionlint_1.7.1_linux_amd64.tar.gz \
+            | tar -xz
+          mv actionlint /usr/local/bin/actionlint
+          chmod +x /usr/local/bin/actionlint
+          actionlint --version
+
+      - name: Lint workflows
+        run: |
+          actionlint --verbose

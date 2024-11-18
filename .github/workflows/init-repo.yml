@@ -1,0 +1,59 @@
+---
+name: Init repository
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  set_branch_protection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract repository name
+        id: repo_name
+        run: echo "name=$(echo "${{ github.repository }}" | cut -d'/' -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Get repository information
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.SRE_AMENITIZ_OAUTH_TOKEN }}
+
+      - name: Send request
+        run: |
+          curl -L \
+          -X POST \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ secrets.SRE_AMENITIZ_OAUTH_TOKEN }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${{ github.repository }}/rulesets \
+          -d '{
+            "owner": "'"${{ github.repository_owner }}"'",
+            "repo": "'"${{ steps.repo_name.outputs.name }}"'",
+            "name": "Protect default branch",
+            "target": "branch",
+            "enforcement": "active",
+            "conditions": {
+                "ref_name": {
+                "exclude": [],
+                "include": [ "~DEFAULT_BRANCH" ]
+              }
+            },
+            "rules": [
+              { "type": "deletion" },
+              { "type": "non_fast_forward" },
+              { "type": "required_linear_history" },
+              {
+                "type": "pull_request",
+                "parameters": {
+                  "required_approving_review_count": 1,
+                  "dismiss_stale_reviews_on_push": false,
+                  "require_code_owner_review": false,
+                  "require_last_push_approval": false,
+                  "required_review_thread_resolution": false
+                }
+              }
+            ]
+          }'
+        env:
+          GITHUB_TOKEN: ${{ secrets.SRE_AMENITIZ_OAUTH_TOKEN }}
